@@ -1,0 +1,8 @@
+[package]
+name = "audio_buffer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bytes_parser={ git="https://github.com/SuccessfullyFailed/bytes_parser" }
+file_ref={ git="https://github.com/SuccessfullyFailed/file_ref" }
