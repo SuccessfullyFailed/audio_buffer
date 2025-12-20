@@ -4,6 +4,12 @@ use crate::AudioBuffer;
 
 impl AudioBuffer {
 
+	/// Return the audio-buffer resampled. Automatically picks the best available algorithms depending on the buffer.
+	pub fn resampled(mut self, channel_count:usize, sample_rate:u32) -> Self {
+		self.resample(channel_count, sample_rate);
+		self
+	}
+
 	/// Resample the audio. Automatically picks the best available algorithms depending on the buffer.
 	pub fn resample(&mut self, channel_count:usize, sample_rate:u32) {
 		if channel_count < self.channel_count {
@@ -70,10 +76,11 @@ impl AudioBuffer {
 		let new_sample_count:usize = (current_sample_count as f32 / self.sample_rate as f32 * new_sample_rate as f32) as usize;
 		let samples_to_remove:usize = current_sample_count - new_sample_count;
 		let remove_sample_every:usize = current_sample_count / samples_to_remove / channel_count; // Make sure to remove sample in each channel.
+		let max_mod_index:usize = remove_sample_every - channel_count;
 		
 		let mut index:usize = 0;
 		self.data.retain(|_| {
-			let keep:bool = index % remove_sample_every >= channel_count;
+			let keep:bool = index % remove_sample_every < max_mod_index;
 			index += 1;
 			keep
 		});
@@ -87,14 +94,14 @@ impl AudioBuffer {
 		let channel_count:usize = self.channel_count;
 
 		let new_sample_count:usize = (current_sample_count as f32 / self.sample_rate as f32 * new_sample_rate as f32) as usize;
-		let samples_to_insert:usize = current_sample_count - new_sample_count;
+		let samples_to_insert:usize = new_sample_count - current_sample_count;
 		let insert_one_sample_every:usize = current_sample_count / samples_to_insert / channel_count; // Make sure to insert sample in each channel.
 		
-		let mut insert_index:usize = 0;
+		let mut insert_index:usize = 1;
 		for _ in 0..samples_to_insert {
 			let new_data:Vec<f32> = self.data.iter().skip(insert_index).take(channel_count).cloned().collect();
 			self.data.splice(insert_index..insert_index, new_data);
-			insert_index += insert_one_sample_every;
+			insert_index += insert_one_sample_every + 1; // Take inserted sample into account.
 		}
 
 		self.sample_rate = new_sample_rate;
