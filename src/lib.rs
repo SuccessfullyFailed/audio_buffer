@@ -2,5 +2,7 @@ mod core;
 mod wav_parser;
 mod resampling;
 mod resampling_u;
+mod trimming;
+mod trimming_u;
 
 pub use core::*;
