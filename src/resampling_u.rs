@@ -17,7 +17,7 @@ mod test {
 
 	#[test]
 	fn create_debug_wave() {
-		debug_wave(100, 2, 100).debug_print(100);
+		debug_wave(100, 2, 100).print_wave(100);
 	}
 
 	#[test]

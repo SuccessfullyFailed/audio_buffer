@@ -19,10 +19,34 @@ impl AudioBuffer {
 
 
 
-	/* DEBUGGING METHODS */
+	/* PROPERTY GETTER METHODS */
+
+	/// Get the data of the buffer.
+	pub fn data(&self) -> &[f32] {
+		&self.data
+	}
+
+	/// Get the data of the buffer mutably.
+	pub fn data_mut(&mut self) -> &mut [f32] {
+		&mut self.data
+	}
+
+	/// Get the channel count of the buffer.
+	pub fn channel_count(&self) -> usize {
+		self.channel_count
+	}
+
+	/// Get the sample rate of the buffer.
+	pub fn sample_rate(&self) -> u32 {
+		self.sample_rate
+	}
+
+
+
+	/* USAGE METHODS */
 
 	/// Print a vertical wave over time that shows the data of the buffer.
-	pub fn debug_print(&self, print_width:usize) {
+	pub fn print_wave(&self, print_width:usize) {
 		let print_width_per_lane:f32 = print_width as f32 / self.channel_count as f32;
 		let half_print_width_per_lane:f32 = print_width_per_lane / 2.0;
 		for samples in self.data.chunks(self.channel_count) {
