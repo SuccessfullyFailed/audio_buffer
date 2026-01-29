@@ -1,3 +1,5 @@
+mod effects;
+
 mod core;
 mod wav_parser;
 mod data_modification;
