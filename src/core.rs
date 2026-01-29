@@ -1,4 +1,8 @@
-#[derive(PartialEq, Clone)]
+use std::fmt::Debug;
+
+
+
+#[derive(Clone)]
 pub struct AudioBuffer {
 	pub(crate) data:Vec<f32>,
 	pub(crate) channel_count:usize,
@@ -59,5 +63,34 @@ impl AudioBuffer {
 				}).collect::<Vec<String>>().join("|")
 			);
 		}
+	}
+}
+impl Debug for AudioBuffer {
+	fn fmt(&self, f:&mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "AudioBuffer {{ channel_count: {}, sample_rate: {}, data: {:?} }}", self.channel_count, self.sample_rate, self.data.iter().map(|value| (value * 1000.0).round() / 1000.0).collect::<Vec<f32>>())
+	}
+}
+impl PartialEq for AudioBuffer {
+	fn eq(&self, other:&Self) -> bool {
+		const MAX_SAMPLE_OFFSET: f32 = 0.0001;
+
+		// If simple properties don't match, return false.
+		if self.channel_count != other.channel_count || self.sample_rate != other.sample_rate || self.data.len() != other.data.len() {
+			return false;
+		}
+
+		// Check for differences in data values using a raw pointer, should be faster and increase performance for large audio.
+		let own_data_ptr:*const f32 = self.data.as_ptr();
+		let other_data_ptr:*const f32 = other.data.as_ptr();
+		unsafe {
+			for sample_index in 0..self.data.len() {
+				if (*own_data_ptr.add(sample_index) - *other_data_ptr.add(sample_index)).abs() > MAX_SAMPLE_OFFSET {
+					return false;
+				}
+			}
+		}
+
+		// No meaningful differences were found.
+		true
 	}
 }
