@@ -6,9 +6,15 @@ version = 4
 name = "audio_buffer"
 version = "0.1.0"
 dependencies = [
+ "byte_convertible",
  "bytes_parser",
  "file_ref",
 ]
+
+[[package]]
+name = "byte_convertible"
+version = "0.1.0"
+source = "git+https://github.com/SuccessfullyFailed/byte_convertible#4366caa34110fc2246c49c3962c864dc875992ae"
 
 [[package]]
 name = "bytes_parser"

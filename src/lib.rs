@@ -1,5 +1,3 @@
-mod effects;
-
 mod core;
 mod wav_parser;
 mod data_modification;
@@ -10,5 +8,7 @@ mod trimming;
 mod trimming_u;
 mod mixing;
 mod mixing_u;
+mod effect;
+pub use effect::*;
 
 pub use core::*;

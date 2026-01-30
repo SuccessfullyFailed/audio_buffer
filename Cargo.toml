@@ -4,5 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+byte_convertible={ git="https://github.com/SuccessfullyFailed/byte_convertible" }
 bytes_parser={ git="https://github.com/SuccessfullyFailed/bytes_parser" }
+file_ref={ git="https://github.com/SuccessfullyFailed/file_ref" }
+
+[build-dependencies]
 file_ref={ git="https://github.com/SuccessfullyFailed/file_ref" }
