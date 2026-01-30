@@ -36,12 +36,12 @@ impl AudioAmplifier {
 impl AudioEffect for AudioAmplifier {
 
 
-	/// Apply the effect to an audio sample.
-	fn apply_to(&mut self, sample:&mut AudioBuffer) {
+	/// Apply the effect to an audio buffer.
+	fn apply_to(&mut self, buffer:&mut AudioBuffer) {
 		let mut volume_scale:f32 = 1.0;
 
 		if let Some(target_volume) = self.settings.get::<f32>(SETTING_VOLUME_TARGET) {
-			if let Some(current_max_volume) = sample.data().into_iter().max_by(|a, b| a.abs().partial_cmp(&b.abs()).unwrap()) {
+			if let Some(current_max_volume) = buffer.data().into_iter().max_by(|a, b| a.abs().partial_cmp(&b.abs()).unwrap()) {
 				volume_scale *= target_volume / current_max_volume;
 			}
 		}
@@ -49,7 +49,7 @@ impl AudioEffect for AudioAmplifier {
 			volume_scale *= volume_multiplier;
 		}
 
-		Self::amplify_raw_data(&mut sample.data, volume_scale);
+		Self::amplify_raw_data(&mut buffer.data, volume_scale);
 	}
 
 	/// Get the settings.
