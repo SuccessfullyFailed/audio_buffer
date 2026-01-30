@@ -5,7 +5,7 @@ use crate::{ AudioBuffer, AudioSettings };
 pub trait AudioEffect {
 
 	/// Apply the effect to an audio sample.
-	fn apply(&mut self, sample:&mut AudioBuffer);
+	fn apply_to(&mut self, sample:&mut AudioBuffer);
 
 	/// Get the settings.
 	fn settings(&self) -> &AudioSettings;

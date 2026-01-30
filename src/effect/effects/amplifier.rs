@@ -37,7 +37,7 @@ impl AudioEffect for AudioAmplifier {
 
 
 	/// Apply the effect to an audio sample.
-	fn apply(&mut self, sample:&mut AudioBuffer) {
+	fn apply_to(&mut self, sample:&mut AudioBuffer) {
 		let mut volume_scale:f32 = 1.0;
 
 		if let Some(target_volume) = self.settings.get::<f32>(SETTING_VOLUME_TARGET) {
