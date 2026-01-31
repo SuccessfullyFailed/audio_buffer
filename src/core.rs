@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct AudioBuffer {
 	pub(crate) data:Vec<f32>,
 	pub(crate) channel_count:usize,
@@ -64,15 +64,9 @@ impl AudioBuffer {
 			);
 		}
 	}
-}
-impl Debug for AudioBuffer {
-	fn fmt(&self, f:&mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "AudioBuffer {{ channel_count: {}, sample_rate: {}, data: {:?} }}", self.channel_count, self.sample_rate, self.data.iter().map(|value| (value * 1000.0).round() / 1000.0).collect::<Vec<f32>>())
-	}
-}
-impl PartialEq for AudioBuffer {
-	fn eq(&self, other:&Self) -> bool {
-		const MAX_SAMPLE_OFFSET: f32 = 0.0001;
+
+	/// Wether or not this buffer is similar to another.
+	pub fn similar_to(&self, other:&AudioBuffer, max_sample_offset:f32) -> bool {
 
 		// If simple properties don't match, return false.
 		if self.channel_count != other.channel_count || self.sample_rate != other.sample_rate || self.data.len() != other.data.len() {
@@ -84,7 +78,7 @@ impl PartialEq for AudioBuffer {
 		let other_data_ptr:*const f32 = other.data.as_ptr();
 		unsafe {
 			for sample_index in 0..self.data.len() {
-				if (*own_data_ptr.add(sample_index) - *other_data_ptr.add(sample_index)).abs() > MAX_SAMPLE_OFFSET {
+				if (*own_data_ptr.add(sample_index) - *other_data_ptr.add(sample_index)).abs() > max_sample_offset {
 					return false;
 				}
 			}
@@ -92,5 +86,25 @@ impl PartialEq for AudioBuffer {
 
 		// No meaningful differences were found.
 		true
+	}
+
+	/// Assert this buffer is similar to another. A lot like the 'assert_eq' macro, but allows for a sample offset.
+	pub fn assert_similar(&self, other:&AudioBuffer, max_sample_offset:f32) {
+		if !self.similar_to(other, max_sample_offset) {
+			let data_scale:f32 = if max_sample_offset < 1.0 { 1.0 / max_sample_offset } else { max_sample_offset };
+			panic!(
+				"Assertion `left similar to right` failed.\nleft:  AudioBuffer {{\n\tchannel_count: {}\n\tsample_rate: {}\n\tdata length: {}\n\tdata simplified: {:?}\n\tdata raw: {:?}\n}}\nright: AudioBuffer {{\n\tchannel_count: {}\n\tsample_rate: {}\n\tdata length: {}\n\tdata simplified: {:?}\n\tdata raw: {:?}\n}}",
+				self.channel_count,
+				self.sample_rate,
+				self.data.len(),
+				self.data.iter().map(|value| (value * data_scale).round() / data_scale).collect::<Vec<f32>>(),
+				self.data,
+				other.channel_count,
+				other.sample_rate,
+				self.data.len(),
+				other.data.iter().map(|value| (value * data_scale).round() / data_scale).collect::<Vec<f32>>(),
+				other.data
+			);
+		}
 	}
 }

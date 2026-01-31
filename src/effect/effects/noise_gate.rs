@@ -57,16 +57,25 @@ impl AudioEffect for NoiseGate {
 		
 		// Apply noise-gate effect using cache.
 		if let Some(cache) = &self.cache {
+			if cache.batch_size == 0 {
+				return;
+			}
 			for batch in buffer.data.chunks_mut(cache.batch_size as usize) {
+
+				// Modify cursor based on batch peak.
 				let batch_max:f32 = batch.iter().max_by(|a, b| a.abs().partial_cmp(&b.abs()).unwrap()).unwrap_or(&0.0).abs();
-				if batch_max > cache.lower_threshold && self.cursor < cache.upper_limit {
-					self.cursor = (self.cursor + cache.shift_per_batch).min(cache.upper_limit);
+				if batch_max > cache.lower_threshold && self.cursor < 1.0 {
+					self.cursor = (self.cursor + cache.shift_per_batch).min(1.0);
 				}
 				if batch_max < cache.lower_threshold && self.cursor >= 0.0 {
 					self.cursor = (self.cursor - cache.shift_per_batch).max(0.0);
 				}
+
+				// Calculate and apply scale for batch.
+				let peak:f32 = self.cursor * batch_max;
+				let scale:f32 = if peak < cache.upper_limit { self.cursor } else { 1.0 / batch_max * cache.upper_limit };
 				for sample in batch {
-					*sample *= self.cursor;
+					*sample *= scale;
 				}
 			}
 		}
