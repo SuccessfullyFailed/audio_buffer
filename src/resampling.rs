@@ -75,15 +75,15 @@ impl AudioBuffer {
 
 		let new_sample_count:usize = (current_sample_count as f32 / self.sample_rate as f32 * new_sample_rate as f32) as usize;
 		let samples_to_remove:usize = current_sample_count - new_sample_count;
-		let remove_sample_every:usize = current_sample_count / samples_to_remove; // Make sure to remove sample in each channel.
-		let max_mod_index:usize = remove_sample_every - channel_count;
+		let remove_samples_every:usize = current_sample_count / samples_to_remove / channel_count; // Make sure to remove sample in each channel.
 		
-		let mut index:usize = 0;
-		self.data.retain(|_| {
-			let keep:bool = index % remove_sample_every < max_mod_index;
-			index += 1;
-			keep
-		});
+		let mut removal_index:usize = remove_samples_every - channel_count;
+		for _ in 0..samples_to_remove / channel_count {
+			for _ in 0..channel_count {
+				self.data.remove(removal_index);
+			}
+			removal_index += remove_samples_every - channel_count;
+		}
 
 		self.sample_rate = new_sample_rate;
 	}
@@ -95,13 +95,13 @@ impl AudioBuffer {
 
 		let new_sample_count:usize = (current_sample_count as f32 / self.sample_rate as f32 * new_sample_rate as f32) as usize;
 		let samples_to_insert:usize = new_sample_count - current_sample_count;
-		let insert_one_sample_every:usize = current_sample_count / samples_to_insert; // Make sure to insert sample in each channel.
+		let insert_samples_every:usize = current_sample_count / samples_to_insert / channel_count; // Make sure to insert sample in each channel.
 		
 		let mut insert_index:usize = 1;
-		for _ in 0..samples_to_insert {
+		for _ in 0..samples_to_insert / channel_count {
 			let new_data:Vec<f32> = self.data.iter().skip(insert_index).take(channel_count).cloned().collect();
 			self.data.splice(insert_index..insert_index, new_data);
-			insert_index += insert_one_sample_every + channel_count; // Take inserted sample s into account.
+			insert_index += insert_samples_every + channel_count; // Take inserted sample s into account.
 		}
 
 		self.sample_rate = new_sample_rate;
