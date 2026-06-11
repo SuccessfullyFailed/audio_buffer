@@ -23,11 +23,15 @@ mod test {
 	#[test]
 	fn increase_channel_count() {
 		let original_wave:AudioBuffer = debug_wave(800, 1, 100);
-		let resampled_wave:AudioBuffer = original_wave.clone().resampled(3, 100);
+		let resampled_wave:AudioBuffer = original_wave.clone().resampled(2, 100);
+		
+		assert_eq!(resampled_wave.data.len(), 1600);
+		assert_eq!(resampled_wave.sample_rate, 100);
+		assert_eq!(resampled_wave.channel_count, 2);
 		for index in 0..800 {
 			assert_eq!(
-				resampled_wave.data.iter().skip(index * 3).take(3).collect::<Vec<&f32>>(),
-				vec![&original_wave.data[index]; 3]
+				resampled_wave.data.iter().skip(index * 2).take(2).collect::<Vec<&f32>>(),
+				vec![&original_wave.data[index]; 2]
 			);
 		}
 	}
@@ -37,6 +41,10 @@ mod test {
 		let single_channel_wave:AudioBuffer = debug_wave(800, 1, 100);
 		let original_wave:AudioBuffer = debug_wave(800, 5, 100);
 		let resampled_wave:AudioBuffer = original_wave.clone().resampled(2, 100);
+		
+		assert_eq!(resampled_wave.data.len(), 1600);
+		assert_eq!(resampled_wave.sample_rate, 100);
+		assert_eq!(resampled_wave.channel_count, 2);
 		for index in 0..800 {
 			assert_eq!(
 				original_wave.data.iter().skip(index * 5).take(5).collect::<Vec<&f32>>(),
@@ -53,7 +61,11 @@ mod test {
 	fn increase_sample_rate() {
 		let original_wave:AudioBuffer = debug_wave(800, 1, 100);
 		let resampled_wave:AudioBuffer = original_wave.clone().resampled(1, 200);
-		for index in 0..400 {
+		
+		assert_eq!(resampled_wave.data.len(), 1600);
+		assert_eq!(resampled_wave.sample_rate, 200);
+		assert_eq!(resampled_wave.channel_count, 1);
+		for index in 0..800 {
 			assert_eq!(
 				original_wave.data[index],
 				resampled_wave.data[index * 2]
@@ -65,6 +77,10 @@ mod test {
 	fn decrease_sample_rate() {
 		let original_wave:AudioBuffer = debug_wave(800, 1, 100);
 		let resampled_wave:AudioBuffer = original_wave.clone().resampled(1, 50);
+		
+		assert_eq!(resampled_wave.data.len(), 400);
+		assert_eq!(resampled_wave.sample_rate, 50);
+		assert_eq!(resampled_wave.channel_count, 1);
 		for index in 0..400 {
 			assert_eq!(
 				original_wave.data[index * 2],

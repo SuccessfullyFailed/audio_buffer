@@ -27,12 +27,24 @@ mod test {
 	}
 
 	#[test]
-	fn add_badly_sampled_sample() {
+	fn add_mismatched_channel_count() {
 		let original:AudioBuffer = AudioBuffer::new((0..100).map(|index| index as f32 * 0.001).collect(), 1, 1000);
-		let addition:AudioBuffer = AudioBuffer::new((0..200).map(|index| [index as f32 * 0.001; 3]).flatten().collect(), 3, 2000);
+		let addition:AudioBuffer = AudioBuffer::new((0..100).map(|index| [index as f32 * 0.001; 3]).flatten().collect(), 3, 1000);
 		let combined:AudioBuffer = original.combined_with(addition);
 
-		let expected:AudioBuffer = AudioBuffer::new((0..100).map(|index| index as f32 * 0.003).collect(), 1, 1000);
+		let expected:AudioBuffer = AudioBuffer::new((0..100).map(|index| index as f32 * 0.002).collect(), 1, 1000);
+		
+		combined.assert_similar(&expected, 0.0001);
+	}
+
+	#[test]
+	fn add_mismatched_sample_rate() {
+		let original:AudioBuffer = AudioBuffer::new((0..100).map(|index| index as f32 * 0.001).collect(), 1, 1000);
+		let addition:AudioBuffer = AudioBuffer::new((0..200).map(|index| index as f32 * 0.0005).collect(), 1, 2000);
+		original.assert_similar(&addition.clone().resampled(1, 1000), 0.001);
+		let combined:AudioBuffer = original.combined_with(addition);
+
+		let expected:AudioBuffer = AudioBuffer::new((0..100).map(|index| index as f32 * 0.002).collect(), 1, 1000);
 		
 		combined.assert_similar(&expected, 0.0001);
 	}
